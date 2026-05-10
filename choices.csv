@@ -1,0 +1,30 @@
+field,label,type,choice
+cq,Comorbidity quality,select,good
+cq,Comorbidity quality,select,poor
+cq,Comorbidity quality,select,absent
+cq,Comorbidity quality,select,unclear
+mq,Medication quality,select,good
+mq,Medication quality,select,poor
+mq,Medication quality,select,absent
+mq,Medication quality,select,unclear
+lq,Lab quality,select,good
+lq,Lab quality,select,poor
+lq,Lab quality,select,absent
+lq,Lab quality,select,unclear
+cons,Consistency,select,consistent
+cons,Consistency,select,partly consistent
+cons,Consistency,select,discordant
+cons,Consistency,select,unclear
+decision,Overall decision,radio,include
+decision,Overall decision,radio,exclude
+decision,Overall decision,radio,unclear
+reason,Main reason,select,
+reason,Main reason,select,good quality
+reason,Main reason,select,poor comorbidity data
+reason,Main reason,select,poor medication data
+reason,Main reason,select,poor lab data
+reason,Main reason,select,discordant signals
+reason,Main reason,select,sparse counts
+reason,Main reason,select,missing denominator
+reason,Main reason,select,other
+notes,Notes,text,
