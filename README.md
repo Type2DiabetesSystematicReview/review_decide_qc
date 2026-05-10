@@ -44,3 +44,24 @@ Example report filename:
 
 ```text
 www/reports/NCT12312412.html
+
+# Post hoc fixes and adjudication
+
+The app does not overwrite previous decisions. Each time someone clicks **Save**, a new row is appended to `decisions.sqlite`.
+
+This means that corrections and adjudicated decisions can be handled using the same app, without manually editing the database.
+
+## Recommended approach
+
+Add one or more administrative reviewer names to `reviewer_list.csv`.
+
+For example:
+
+```csv
+reviewer
+David McAllister
+Jane Smith
+Alice Brown
+Adjudication
+Admin correction
+
