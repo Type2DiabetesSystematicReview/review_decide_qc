@@ -290,6 +290,7 @@ This means a trial can have more than one review.
 ## 7. Previous reviews
 
 When a reviewer selects a trial, the app checks whether there are previous reviews for the same sponsor and trial.
+Saved decisions are available immediately. If a reviewer saves a decision, moves to another trial, and then returns to the original trial in the same Shiny session, the app will show the newly saved decision as a previous review. The app does not need to be restarted.
 
 The sidebar shows:
 
