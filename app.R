@@ -294,7 +294,7 @@ ui <- fluidPage(
       actionButton("save", "Save"),
 
       # Next moves to the next trial within the selected sponsor.
-      actionButton("next", "Next")
+      actionButton("nxt", "Next")
     ),
 
     mainPanel(
@@ -471,7 +471,7 @@ server <- function(input, output, session) {
   #
   # Moves to the next trial within the currently selected sponsor.
   # If already at the final trial for that sponsor, show a message.
-  observeEvent(input$next, {
+  observeEvent(input$nxt, {
     x <- rows()$trial
     i <- match(input$trial, x)
 
