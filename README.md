@@ -4,7 +4,7 @@
 
 This Shiny app supports structured review of pre-generated trial-level HTML reports.
 
-It is intended for small review teams working with clinical trial summaries, for example when checking whether trial-level summaries of medical history, drug history, and laboratory abnormalities are sufficiently reliable for downstream analysis.
+It is intended for small review teams working with clinical trial summaries, for example when checking whether counts of medical conditions, drugs, and laboratory abnormalities are sufficiently reliable for downstream analysis.
 
 For each trial, the app lets a reviewer:
 
@@ -244,6 +244,7 @@ notes,Notes,text,
 
 ## 5. How to run the app
 
+### A In Rstudio
 1. Open the app folder in RStudio.
 2. Open `app.R`.
 3. Install required packages if needed:
@@ -257,6 +258,23 @@ install.packages(c("shiny", "DBI", "RSQLite"))
 ```r
 shiny::runApp()
 ```
+
+### B In R
+
+You may wish to run the app from R GUI so that Rstudio is free for other tasks
+1. Open the R gui and use setwd() for the directory where app.R is stored
+2. Run the following code in R:-
+
+```
+shiny::runApp(
+  appDir = ".",
+  host = "127.0.0.1",
+  port = 3838,
+  launch.browser = FALSE
+)
+```
+
+3. In the browser (e.g. Edge, chrome) open http://127.0.0.1:3838. Note closing the browser will not stop the app. To stop the app you need to press Escape if running R in Windows or ctr+C if running R in Linux.
 
 5. Select your reviewer name.
 6. Select a sponsor.
