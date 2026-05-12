@@ -70,6 +70,11 @@ choices <- read.csv(
 # empty lines.
 choices <- choices[choices$field != "", ]
 
+# Filterable fields for trial filtering in the sidebar.
+# Keep this limited to select/radio fields to avoid free-text matching UI.
+filter_choices <- choices[choices$type %in% c("select", "radio"), ]
+filter_fields <- unique(filter_choices$field)
+
 
 # reviewer_list.csv defines the reviewer dropdown.
 # Required column:
@@ -268,6 +273,21 @@ ui <- fluidPage(
         reviewers$reviewer
       ),
 
+      # Optional compact trial filter based on latest saved decision values.
+      tags$details(
+        tags$summary("Filter trials (optional)"),
+        selectInput(
+          "filter_field",
+          "Field",
+          choices = c("No filter" = "", setNames(filter_fields, sapply(filter_fields, function(f) {
+            filter_choices$label[match(f, filter_choices$field)]
+          }))),
+          selected = ""
+        ),
+        uiOutput("filter_value_ui"),
+        actionButton("clear_filter", "Clear filter")
+      ),
+
       # Sponsor dropdown.
       # The trial dropdown is updated based on this choice.
       selectInput(
@@ -342,7 +362,36 @@ server <- function(input, output, session) {
 
   # Trials available under the selected sponsor.
   rows <- reactive({
-    items[items$sponsor == input$sponsor, ]
+    x <- items[items$sponsor == input$sponsor, ]
+
+    # Apply optional trial filtering using the latest saved decision per trial.
+    if (!is.null(input$filter_field) && nzchar(input$filter_field) &&
+        !is.null(input$filter_value) && nzchar(input$filter_value)) {
+      latest <- dbGetQuery(
+        con,
+        "SELECT d.*
+         FROM decisions d
+         INNER JOIN (
+           SELECT sponsor, trial, MAX(id) AS max_id
+           FROM decisions
+           GROUP BY sponsor, trial
+         ) latest
+         ON d.id = latest.max_id"
+      )
+
+      if (nrow(latest) == 0 || !(input$filter_field %in% names(latest))) {
+        x <- x[0, , drop = FALSE]
+      } else {
+        keep_trials <- latest$trial[
+          latest$sponsor == input$sponsor &
+            as.character(latest[[input$filter_field]]) == input$filter_value
+        ]
+
+        x <- x[x$trial %in% keep_trials, , drop = FALSE]
+      }
+    }
+
+    x
   })
 
 
@@ -365,6 +414,25 @@ server <- function(input, output, session) {
   })
 
 
+  # Available filter values are driven by the selected field in choices.csv.
+  output$filter_value_ui <- renderUI({
+    if (is.null(input$filter_field) || !nzchar(input$filter_field)) {
+      return(NULL)
+    }
+
+    z <- choices[choices$field == input$filter_field, ]
+    ch <- unique(z$choice[!is.na(z$choice) & z$choice != ""])
+
+    selectInput("filter_value", "Value", ch)
+  })
+
+
+  # Clear filter selection in one click.
+  observeEvent(input$clear_filter, {
+    updateSelectInput(session, "filter_field", selected = "")
+  })
+
+
   # Dynamic review form built from choices.csv.
   #
   # The form uses the most recent previous values as defaults for select/radio
@@ -384,6 +452,10 @@ server <- function(input, output, session) {
 
   # Page title for selected sponsor/trial.
   output$title <- renderText({
+    if (is.null(input$trial) || !nzchar(input$trial)) {
+      return(paste(input$sponsor, "(no matching trials)"))
+    }
+
     paste(input$sponsor, input$trial)
   })
 
@@ -396,6 +468,10 @@ server <- function(input, output, session) {
   # Shiny serves www/ directly, so the iframe source starts with:
   #   reports/
   output$report <- renderUI({
+    if (is.null(input$trial) || !nzchar(input$trial)) {
+      return(tags$p("No trial matches the current filter."))
+    }
+
     tags$iframe(
       src = paste0("reports/", input$trial, ".html"),
       width = "100%",
